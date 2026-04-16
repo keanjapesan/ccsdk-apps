@@ -15,7 +15,7 @@ on:
   # To guarantee Maintained check is occasionally updated. See
   # https://github.com/ossf/scorecard/blob/main/docs/checks.md#maintained
   schedule:
-    - cron: "0 0 * * 6"
+    - cron: "47 3 * * 6"
   push:
     branches: ["main", "master"]
     paths:
@@ -26,9 +26,34 @@ on:
 permissions: {}
 
 jobs:
+  build-maven:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          #ref: ${{ github.ref_name }}
+          submodules: "true"
+      - name: 'Build with Maven'
+        #if: steps.check-pom-xml.outputs.exists == 'true'
+        continue-on-error: true
+        # yamllint disable-line rule:line-length
+        uses: lfreleng-actions/maven-build-action@3e8765bbc2685951fb7c2be03964304179106b70 # v0.2.1
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          mvn-version: '3.9.9'
+          mvn-phases: 'clean package'
+          mvn-params: ''
+          # yamllint disable-line rule:line-length
+          mvn-opts: ''
+          global-settings: ${{ vars.GLOBAL_SETTINGS }}
+          run-jacoco: 'false'
   call-sonatype-lifecycle:
+    needs: build-maven
     name: "Sonatype Lifecycle (CLM -> Nexus IQ)"
     # yamllint disable-line rule:line-length
     uses: lfit/releng-reusable-workflows/.github/workflows/reuse-sonatype-lifecycle.yaml@37bbdea5cca2f21e502f7ff580306c78307d1d41 # v0.3.1
+    with:
+      application_id: "onap-ccsdk-apps"
     secrets:
       NEXUS_IQ_PASSWORD: ${{ secrets.NEXUS_IQ_PASSWORD }}
