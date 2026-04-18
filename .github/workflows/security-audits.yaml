@@ -48,12 +48,11 @@ jobs:
           mvn-opts: ''
           global-settings: ${{ vars.GLOBAL_SETTINGS }}
           run-jacoco: 'false'
-  call-sonatype-lifecycle:
-    needs: build-maven
-    name: "Sonatype Lifecycle (CLM -> Nexus IQ)"
-    # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/reuse-sonatype-lifecycle.yaml@37bbdea5cca2f21e502f7ff580306c78307d1d41 # v0.3.1
-    with:
-      application_id: "onap-ccsdk-apps"
-    secrets:
-      NEXUS_IQ_PASSWORD: ${{ secrets.NEXUS_IQ_PASSWORD }}
+      - name: "Sonatype Lifecycle (CLM -> Nexus IQ)"
+        # yamllint disable-line rule:line-length
+        uses: lfit/releng-reusable-workflows/.github/workflows/reuse-sonatype-lifecycle.yaml@37bbdea5cca2f21e502f7ff580306c78307d1d41 # v0.3.1
+        with:
+          application_id: "onap-ccsdk-apps"
+          #artifact_name: "maven-build-artifacts"
+        secrets:
+          NEXUS_IQ_PASSWORD: ${{ secrets.NEXUS_IQ_PASSWORD }}
